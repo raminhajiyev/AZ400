@@ -1,0 +1,37 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  name: Default 
+
+variables:
+  storageAccountName: "storagetestdevops1"
+  containerName: "test-case"
+  filePath: "$(Build.SourcesDirectory)/test.zip" # The file you want to upload
+  servicePrincipalId: "3983444f-6dcc-4ac2-acd7-246817654d3e"
+  tenantId: "ef2829b1-46d8-4b2a-b962-9241518e03f5"
+  subscriptionId: "6f28a0a1-2e2a-4481-8787-d6c49d238489"
+
+steps:
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'ServicePrincipalConnection'
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # Authenticate the service principal
+      $securePassword = ConvertTo-SecureString -String "$(servicePrincipalKey)" -AsPlainText -Force
+      $psCredential = New-Object System.Management.Automation.PSCredential -ArgumentList $(servicePrincipalId), $securePassword
+      Connect-AzAccount -ServicePrincipal -Credential $psCredential -Tenant $(tenantId) -Subscription $(subscriptionId)
+
+      # Perform the file copy operation
+      Set-AzStorageBlobContent -File "$(filePath)" -Container "$(containerName)" -Context (New-AzStorageContext -StorageAccountName "$(storageAccountName)" -StorageAccountKey $(storageAccountKey))
+  
+  env:
+    servicePrincipalKey: $(servicePrincipalKey)
+    storageAccountKey: $(storageAccountKey)
