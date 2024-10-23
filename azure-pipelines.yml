@@ -20,7 +20,7 @@ variables:
 steps:
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'ServicePrincipalConnection'
+    azureSubscription: 'ServicePrincipalConnection'  # This is the service connection in Azure DevOps
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
@@ -30,8 +30,9 @@ steps:
       Connect-AzAccount -ServicePrincipal -Credential $psCredential -Tenant $(tenantId) -Subscription $(subscriptionId)
 
       # Perform the file copy operation
-      Set-AzStorageBlobContent -File "$(filePath)" -Container "$(containerName)" -Context (New-AzStorageContext -StorageAccountName "$(storageAccountName)" -StorageAccountKey $(storageAccountKey))
-  
+      $storageContext = New-AzStorageContext -StorageAccountName "$(storageAccountName)" -StorageAccountKey "$(storageAccountKey)"
+      Set-AzStorageBlobContent -File "$(filePath)" -Container "$(containerName)" -Context $storageContext
+
   env:
-    servicePrincipalKey: $(servicePrincipalKey)
-    storageAccountKey: $(storageAccountKey)
+    servicePrincipalKey: $(servicePrincipalKey)  # Securely stored Service Principal secret
+    storageAccountKey: $(storageAccountKey)      # Securely stored Storage Account Key
