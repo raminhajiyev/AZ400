@@ -7,7 +7,7 @@ trigger:
 - main
 
 pool:
-  name: Default 
+  name: Default # Change this to your self-hosted agent pool
 
 variables:
   storageAccountName: "storagetestdevops1"
@@ -20,19 +20,16 @@ variables:
 steps:
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'sp-testcase'  # This is the service connection in Azure DevOps
-    scriptType: 'ps'
+    azureSubscription: 'ServicePrincipalConnection'
+    scriptType: 'bash' # Use 'bash' for CLI commands
     scriptLocation: 'inlineScript'
     inlineScript: |
-      # Authenticate the service principal
-      $securePassword = ConvertTo-SecureString -String "$(servicePrincipalKey)" -AsPlainText -Force
-      $psCredential = New-Object System.Management.Automation.PSCredential -ArgumentList $(servicePrincipalId), $securePassword
-      Connect-AzAccount -ServicePrincipal -Credential $psCredential -Tenant $(tenantId) -Subscription $(subscriptionId)
+      # Authenticate the service principal using Azure CLI
+      az login --service-principal -u "$(servicePrincipalId)" -p "$(servicePrincipalKey)" --tenant "$(tenantId)"
 
-      # Perform the file copy operation
-      $storageContext = New-AzStorageContext -StorageAccountName "$(storageAccountName)" -StorageAccountKey "$(storageAccountKey)"
-      Set-AzStorageBlobContent -File "$(filePath)" -Container "$(containerName)" -Context $storageContext
-
+      # Upload the file to the specified Azure Blob Storage container
+      az storage blob upload --account-name "$(storageAccountName)" --container-name "$(containerName)" --file "$(filePath)" --name "test.zip" --auth-mode key --account-key "$(storageAccountKey)"
+  
   env:
-    servicePrincipalKey: $(servicePrincipalKey)  # Securely stored Service Principal secret
-    storageAccountKey: $(storageAccountKey)      # Securely stored Storage Account Key
+    servicePrincipalKey: $(servicePrincipalKey)
+    storageAccountKey: $(storageAccountKey)
