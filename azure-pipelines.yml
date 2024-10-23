@@ -16,8 +16,20 @@ variables:
   servicePrincipalId: "3983444f-6dcc-4ac2-acd7-246817654d3e"
   tenantId: "ef2829b1-46d8-4b2a-b962-9241518e03f5"
   subscriptionId: "6f28a0a1-2e2a-4481-8787-d6c49d238489"
+  
+
+
 
 steps:
+- script: |
+    echo "Listing files in the source directory:"
+    Get-ChildItem "$(Build.SourcesDirectory)" | Out-Host
+  displayName: 'List files in source directory'
+
+- script: |
+    az --version
+  displayName: 'Check Azure CLI Version'
+
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'sp-testcase'
@@ -28,7 +40,7 @@ steps:
       az login --service-principal -u "$(servicePrincipalId)" -p "$(servicePrincipalKey)" --tenant "$(tenantId)"
 
       # Upload the file to the specified Azure Blob Storage container
-      az storage blob upload --account-name "$(storageAccountName)" --container-name "$(containerName)" --file "$(filePath)" --name "test.zip" --auth-mode key --account-key "$(storageAccountKey)"
+      az storage blob upload --account-name "$(storageAccountName)" --container-name "$(containerName)" --file "$(filePath)" --name "test.zip" --auth-mode key --account-key "$(storageAccountKey)" --debug
   
   env:
     servicePrincipalKey: $(servicePrincipalKey)
@@ -39,3 +51,4 @@ steps:
     PathtoPublish: '$(Build.SourcesDirectory)/test.zip'  # Path to the file to publish
     ArtifactName: 'UploadedFiles'
     publishLocation: 'Container'
+
