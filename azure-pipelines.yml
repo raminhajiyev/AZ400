@@ -21,7 +21,7 @@ steps:
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'sp-testcase'
-    scriptType: 'bash' # Use 'bash' for CLI commands
+    scriptType: 'ps'  # Use PowerShell for Windows agents
     scriptLocation: 'inlineScript'
     inlineScript: |
       # Authenticate the service principal using Azure CLI
@@ -33,3 +33,4 @@ steps:
   env:
     servicePrincipalKey: $(servicePrincipalKey)
     storageAccountKey: $(storageAccountKey)
+
