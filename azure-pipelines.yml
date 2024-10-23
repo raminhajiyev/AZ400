@@ -34,3 +34,8 @@ steps:
     servicePrincipalKey: $(servicePrincipalKey)
     storageAccountKey: $(storageAccountKey)
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)/test.zip'  # Path to the file to publish
+    ArtifactName: 'UploadedFiles'
+    publishLocation: 'Container'
