@@ -20,7 +20,7 @@ variables:
 steps:
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'ServicePrincipalConnection'
+    azureSubscription: 'sp-testcase'
     scriptType: 'bash' # Use 'bash' for CLI commands
     scriptLocation: 'inlineScript'
     inlineScript: |
